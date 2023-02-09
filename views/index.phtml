@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\HtmlResponse;
+
+/** @var HtmlResponse $this */
+
+/** @var array<string, array<int, string>> $textsArray */
+$textsArray = $this->get('textsArray');
+
+?>
+<header>
+    <h1>
+        <a href="https://github.com/jesperbeisner/arbeitszeugnisgenerator" title="Look at the source code of this application">
+            Arbeitszeugnisgenerator
+        </a>
+    </h1>
+</header>
+
+<hr>
+
+<main>
+    <form method="POST" action="/download">
+        <p>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Max Mustermann" required>
+        </p>
+
+        <fieldset>
+            <legend>Geschlecht</legend>
+            <label>
+                <input type="radio" name="gender" value="m" required>
+                Männlich
+            </label>
+            <label>
+                <input type="radio" name="gender" value="f" required>
+                Weiblich
+            </label>
+        </fieldset>
+
+        <?php foreach ($textsArray as $subject => $texts): ?>
+            <fieldset>
+                <legend><?= $subject ?></legend>
+
+                <?php foreach ($texts as $grade => $text): ?>
+                    <label>
+                        <input type="radio" name="<?= strtolower($subject) ?>" value="<?= $grade ?>" required>
+                        <?= $grade ?>
+                    </label>
+                <?php endforeach; ?>
+            </fieldset>
+        <?php endforeach; ?>
+
+        <p>
+            <button type="submit">Erstellen</button>
+        </p>
+    </form>
+</main>

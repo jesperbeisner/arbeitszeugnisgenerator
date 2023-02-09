@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+    php:
+        build:
+            dockerfile: .docker/dev/Dockerfile
+            context: .
+            args:
+                USER: ${USER}
+        container_name: arbeitszeugnisgenerator-php-dev
+        volumes:
+            - .:/var/www/html
+        ports:
+            - "8080:80"
