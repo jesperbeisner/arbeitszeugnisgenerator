@@ -23,12 +23,17 @@ $textsArray = $this->get('textsArray');
 <main>
     <form method="POST" action="/download">
         <p>
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Max Mustermann" required>
+            <label for="firstName">Vorname*</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Max" required>
+        </p>
+
+        <p>
+            <label for="lastName">Nachname*</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Mustermann" required>
         </p>
 
         <fieldset>
-            <legend>Geschlecht</legend>
+            <legend>Geschlecht*</legend>
             <label>
                 <input type="radio" name="gender" value="m" required>
                 Männlich
@@ -45,12 +50,16 @@ $textsArray = $this->get('textsArray');
 
                 <?php foreach ($texts as $grade => $text): ?>
                     <label>
-                        <input type="radio" name="<?= strtolower($subject) ?>" value="<?= $grade ?>" required>
+                        <input type="radio" name="<?= strtolower(str_replace(' ', '_', $subject)) ?>" value="<?= $grade ?>">
                         <?= $grade ?>
                     </label>
                 <?php endforeach; ?>
             </fieldset>
         <?php endforeach; ?>
+
+        <p>
+            <small>Felder, die mit einem Stern (*) gekennzeichnet sind, sind verpflichtend.</small>
+        </p>
 
         <p>
             <button type="submit">Erstellen</button>
