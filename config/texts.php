@@ -38,5 +38,11 @@ return [
         2 => 'Auch bei sehr hohem Arbeitsanfall erwies sich %Frau/Herr% %Nachname% als %belastbare/belastbarer% %Mitarbeiterin/Mitarbeiter% und ging überlegt, ruhig und zielorientiert vor.',
         3 => 'Auch bei hohem Arbeitsanfall erwies sich %Frau/Herr% %Nachname% als %belastbare/belastbarer% %Mitarbeiterin/Mitarbeiter%.',
         4 => 'Bei üblichem Arbeitsanfall erwies sich %Frau/Herr% %Nachname% als %zuverlässige/zuverlässiger% %Mitarbeiterin/Mitarbeiter%.',
-    ]
+    ],
+    'Schlussformulierungen' => [
+        1 => '%Frau/Herr% %Nachname% verlässt das Unternehmen zum %Austrittsdatum% auf eigenen Wunsch, um sich einer neuen beruflichen Herausforderung zu stellen. Wir bedauern es sehr, %Frau/Herrn% %Nachname% zu verlieren, danken für %ihre/seine% stets wertvolle Arbeit und wünschen %ihr/ihm% sowohl für %ihre/seine% berufliche als auch private Zukunft weiterhin viel Erfolg und alles Gute.',
+        2 => '%Frau/Herr% %Nachname% verlässt das Unternehmen zum %Austrittsdatum% auf eigenen Wunsch, um sich einer neuen beruflichen Herausforderung zu stellen. Wir bedauern es sehr, %Frau/Herrn% %Nachname% zu verlieren, danken für %ihre/seine% stets wertvolle Arbeit und wünschen %ihr/ihm% sowohl für %ihre/seine% berufliche als auch private Zukunft weiterhin viel Erfolg und alles Gute.',
+        3 => '%Frau/Herr% %Nachname% verlässt das Unternehmen zum %Austrittsdatum% auf eigenen Wunsch. Wir danken %ihr/ihm% für %ihre/seine% Leistung und bedauern %ihr/sein% Ausscheiden. Für die Zukunft wünschen wir %ihr/ihm% alles Gute.',
+        4 => '%Frau/Herr% %Nachname% verlässt das Unternehmen zum %Austrittsdatum% auf eigenen Wunsch. Das persönliche Verhalten von %Frau/Herrn% %Nachname% gab uns zu Beanstandungen keinen Anlass. Für die Zukunft wünschen wir %ihr/ihm% alles Gute.',
+    ],
 ];
