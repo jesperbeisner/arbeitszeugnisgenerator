@@ -7,7 +7,7 @@ use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\Request;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-/** @var array<string, array<int, string>> $textsArray */
+/** @var list<array{subject: string, name: string, required: bool, texts: array{1: string, 2: string, 3: string, 4: string}}> $textsArray */
 $textsArray = require __DIR__ . '/../config/texts.php';
 $request = Request::fromGlobals();
 

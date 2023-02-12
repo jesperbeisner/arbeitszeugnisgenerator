@@ -12,7 +12,7 @@ use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\HtmlResponse;
 final readonly class IndexController implements ControllerInterface
 {
     /**
-     * @param array<string, array<int, string>> $textsArray
+     * @param list<array{subject: string, name: string, required: bool, texts: array{1: string, 2: string, 3: string, 4: string}}> $textsArray
      */
     public function __construct(
         private array $textsArray,
@@ -23,6 +23,7 @@ final readonly class IndexController implements ControllerInterface
     {
         return new HtmlResponse('index.phtml', [
             'textsArray' => $this->textsArray,
+            'error' => $request->get['error'] ?? null,
         ]);
     }
 }

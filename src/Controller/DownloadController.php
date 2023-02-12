@@ -11,6 +11,7 @@ use Jesperbeisner\Arbeitszeugnisgenerator\Interface\ResponseInterface;
 use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\Request;
 use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\FileResponse;
 use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\RedirectResponse;
+use PhpOffice\PhpWord\Exception\Exception as PhpOfficeException;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Style\Language;
@@ -19,7 +20,7 @@ use RuntimeException;
 final readonly class DownloadController implements ControllerInterface
 {
     /**
-     * @param array<string, array<int, string>> $textsArray
+     * @param list<array{subject: string, name: string, required: bool, texts: array{1: string, 2: string, 3: string, 4: string}}> $textsArray
      */
     public function __construct(
         private array $textsArray,
@@ -34,14 +35,16 @@ final readonly class DownloadController implements ControllerInterface
 
         try {
             $firstName = $request->post['firstName'] ?? throw new RuntimeException('No first name found');
+            $firstName = trim($firstName);
 
-            if (strlen($firstName) < 3) {
+            if ($firstName === '') {
                 throw new RuntimeException('First name not long enough');
             }
 
             $lastName = $request->post['lastName'] ?? throw new RuntimeException('No last name found');
+            $lastName = trim($lastName);
 
-            if (strlen($lastName) < 3) {
+            if ($lastName === '') {
                 throw new RuntimeException('Last name not long enough');
             }
 
@@ -62,7 +65,7 @@ final readonly class DownloadController implements ControllerInterface
             return new RedirectResponse('/?error=validation');
         }
 
-        $fileName = sys_get_temp_dir() . '/Arbeitszeugnis-' . date('Y-m-d_H-i-s') . '.docx';
+        $fileName = sys_get_temp_dir() . '/Arbeitszeugnis-' . date('Y-m-d-H-i-s') . '.docx';
 
         $phpWord = new PhpWord();
         $phpWord->getSettings()->setThemeFontLang(new Language(Language::DE_DE));
@@ -72,29 +75,75 @@ final readonly class DownloadController implements ControllerInterface
         $section->addTextBreak();
 
         $text = '';
-        foreach ($this->textsArray as $subject => $texts) {
-            $subject = strtolower(str_replace(' ', '_', $subject));
-            $grade = $request->post[$subject] ?? null;
-
-            if ($grade === null) {
+        $paragraphs = 0;
+        foreach ($this->textsArray as $textArray) {
+            if ($textArray['name'] === 'schlussformulierungen') {
                 continue;
             }
 
-            if (!array_key_exists((int) $grade, $texts)) {
-                continue;
+            if (null === $grade = $request->post[$textArray['name']] ?? null) {
+                if ($textArray['required'] === true) {
+                    throw new RuntimeException(sprintf('Field "%s" is required.', $textArray['subject']));
+                } else {
+                    continue;
+                }
             }
 
-            $text .= $this->replaceTextPlaceholder($texts[(int) $grade], $gender, $lastName, $leaveDate) . ' ';
+            if (!array_key_exists((int) $grade, $textArray['texts'])) {
+                if ($textArray['required'] === true) {
+                    throw new RuntimeException(sprintf('Grade for field "%s" is not valid.', $textArray['subject']));
+                } else {
+                    continue;
+                }
+            }
+
+            $text .= $this->replaceTextPlaceholder($textArray['texts'][(int) $grade], $gender, $lastName, $leaveDate) . ' ';
+            $paragraphs++;
+
+            if ($paragraphs === 3) {
+                $section->addText($text);
+                $section->addTextBreak();
+
+                $text = '';
+                $paragraphs = 0;
+            }
         }
 
-        $section->addText($text);
+        $extraText = false;
+        if ($text !== '') {
+            $extraText = true;
+            $section->addText($text);
+        }
 
-        IOFactory::createWriter($phpWord)->save($fileName);
+        // Add "schlussformulierungen" as an own paragraph in the end
+        if (null === $grade = $request->post['schlussformulierungen'] ?? null) {
+            throw new RuntimeException('Field "schlussformulierungen" is required.');
+        }
+
+        foreach ($this->textsArray as $textArray) {
+            if ($textArray['name'] === 'schlussformulierungen') {
+                if (!array_key_exists((int) $grade, $textArray['texts'])) {
+                    throw new RuntimeException('Grade for field "schlussformulierungen" is not valid.');
+                }
+
+                if ($extraText === true) {
+                    $section->addTextBreak();
+                }
+
+                $section->addText($this->replaceTextPlaceholder($textArray['texts'][(int) $grade], $gender, $lastName, $leaveDate));
+            }
+        }
+
+        try {
+            IOFactory::createWriter($phpWord)->save($fileName);
+        } catch (PhpOfficeException) {
+            return new RedirectResponse('/?error=server');
+        }
 
         return new FileResponse($fileName);
     }
 
-    private function replaceTextPlaceholder(string $text, string $gender, string $lastName, \DateTime $leaveDate): string
+    private function replaceTextPlaceholder(string $text, string $gender, string $lastName, DateTime $leaveDate): string
     {
         $text = str_replace('%Frau/Herr%', $gender === 'f' ? 'Frau' : 'Herr', $text);
         $text = str_replace('%Frau/Herrn%', $gender === 'f' ? 'Frau' : 'Herrn', $text);
@@ -106,6 +155,7 @@ final readonly class DownloadController implements ControllerInterface
         $text = str_replace('%Ihre/Seine%', $gender === 'f' ? 'Ihre' : 'Seine', $text);
         $text = str_replace('%ihr/sein%', $gender === 'f' ? 'ihr' : 'sein', $text);
         $text = str_replace('%ihr/ihm%', $gender === 'f' ? 'ihr' : 'ihm', $text);
+        $text = str_replace('%ihren/seinen%', $gender === 'f' ? 'ihren' : 'seinen', $text);
         $text = str_replace('%eine/ein%', $gender === 'f' ? 'eine' : 'ein', $text);
         $text = str_replace('%motivierte/motivierter%', $gender === 'f' ? 'motivierte' : 'motivierter', $text);
         $text = str_replace('%Mitarbeiterin/Mitarbeiter%', $gender === 'f' ? 'Mitarbeiterin' : 'Mitarbeiter', $text);

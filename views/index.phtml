@@ -6,8 +6,11 @@ use Jesperbeisner\Arbeitszeugnisgenerator\Stdlib\HtmlResponse;
 
 /** @var HtmlResponse $this */
 
-/** @var array<string, array<int, string>> $textsArray */
+/** @var list<array{subject: string, name: string, required: bool, texts: array{1: string, 2: string, 3: string, 4: string}}> $textsArray */
 $textsArray = $this->get('textsArray');
+
+/** @var null|string $error */
+$error = $this->get('error');
 
 ?>
 <header>
@@ -22,21 +25,27 @@ $textsArray = $this->get('textsArray');
 
 <main>
     <form method="POST" action="/download">
+        <?php if ($error !== null): ?>
+            <?php if ($error === 'validation'): ?>
+                <p id="error" style="color: #972a2a">Es ist ein Fehler bei der Validierung aufgetreten. Bitte alle Felder vollständig ausfüllen und erneut versuchen.</p>
+            <?php endif; ?>
+
+            <?php if ($error === 'server'): ?>
+                <p id="error" style="color: #972a2a">Es ist ein interner Fehler aufgetreten. Bitte erneut versuchen.</p>
+            <?php endif; ?>
+        <?php endif; ?>
         <p>
             <label for="firstName">Vorname*</label>
             <input type="text" id="firstName" name="firstName" placeholder="Max" required>
         </p>
-
         <p>
             <label for="lastName">Nachname*</label>
             <input type="text" id="lastName" name="lastName" placeholder="Mustermann" required>
         </p>
-
         <p>
             <label for="leaveDate">Austrittsdatum*</label>
             <input type="date" id="leaveDate" name="leaveDate" required>
         </p>
-
         <fieldset>
             <legend>Geschlecht*</legend>
             <label>
@@ -48,26 +57,32 @@ $textsArray = $this->get('textsArray');
                 Weiblich
             </label>
         </fieldset>
-
-        <?php foreach ($textsArray as $subject => $texts): ?>
+        <?php foreach ($textsArray as $textArray): ?>
             <fieldset>
-                <legend><?= $subject ?></legend>
+                <legend><?= $textArray['subject'] ?><?= $textArray['required'] ? '*' : '' ?></legend>
 
-                <?php foreach ($texts as $grade => $text): ?>
+                <?php foreach ($textArray['texts'] as $grade => $text): ?>
                     <label>
-                        <input type="radio" name="<?= strtolower(str_replace(' ', '_', $subject)) ?>" value="<?= $grade ?>">
+                        <input type="radio" name="<?= $textArray['name'] ?>" value="<?= $grade ?>">
                         <?= $grade ?>
                     </label>
                 <?php endforeach; ?>
             </fieldset>
         <?php endforeach; ?>
-
         <p>
             <small>Felder, die mit einem Stern (*) gekennzeichnet sind, sind verpflichtend.</small>
         </p>
-
         <p>
             <button type="submit">Erstellen</button>
         </p>
     </form>
 </main>
+
+<script>
+    const Error = document.getElementById('error');
+    if (Error !== null) {
+        setTimeout(() => {
+            Error.remove();
+        }, 7500);
+    }
+</script>
