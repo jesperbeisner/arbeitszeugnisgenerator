@@ -11,5 +11,6 @@ final class IndexControllerTest extends TestCase
     public function test(): void
     {
         self::assertSame('one day i will write a test :^)', strtolower('One day I will write a test :^)'));
+        static::markTestIncomplete('soon™');
     }
 }
